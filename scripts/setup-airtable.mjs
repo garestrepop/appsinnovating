@@ -106,6 +106,7 @@ function buildTableDefs({ projectsTableId, sessionsTableId }) {
         { name: "Name", type: "singleLineText" },
         { name: "Client", type: "singleLineText" },
         { name: "Description", type: "multilineText" },
+        { name: "DriveFolderId", type: "singleLineText" },
         { name: "CreatedAt", type: "singleLineText" },
       ],
     },
@@ -122,6 +123,7 @@ function buildTableDefs({ projectsTableId, sessionsTableId }) {
         { name: "Status", ...singleSelect(["programada", "en_curso", "finalizada"]) },
         { name: "Notes", type: "multilineText" },
         { name: "Transcript", type: "multilineText" },
+        { name: "DriveFolderId", type: "singleLineText" },
         { name: "CreatedAt", type: "singleLineText" },
       ],
     },
@@ -151,7 +153,8 @@ function buildTableDefs({ projectsTableId, sessionsTableId }) {
       fields: [
         { name: "Filename", type: "singleLineText" },
         { name: "Kind", ...singleSelect(["foto", "documento", "audio"]) },
-        { name: "File", type: "multipleAttachments" },
+        { name: "DriveFileId", type: "singleLineText" },
+        { name: "Url", type: "url" },
         {
           name: "Session",
           type: "multipleRecordLinks",

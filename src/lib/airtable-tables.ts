@@ -13,6 +13,7 @@ export const PROJECT_FIELDS = {
   name: "Name",
   client: "Client",
   description: "Description",
+  driveFolderId: "DriveFolderId",
   createdAt: "CreatedAt",
 } as const;
 
@@ -23,6 +24,7 @@ export const SESSION_FIELDS = {
   status: "Status",
   notes: "Notes",
   transcript: "Transcript",
+  driveFolderId: "DriveFolderId",
   createdAt: "CreatedAt",
 } as const;
 
@@ -40,7 +42,8 @@ export const REQUIREMENT_FIELDS = {
 export const ATTACHMENT_FIELDS = {
   filename: "Filename",
   kind: "Kind",
-  file: "File",
+  driveFileId: "DriveFileId",
+  url: "Url",
   session: "Session",
   createdAt: "CreatedAt",
 } as const;

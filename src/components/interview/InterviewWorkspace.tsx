@@ -78,19 +78,14 @@ export function InterviewWorkspace({
   async function handleAudioReady(blob: Blob) {
     const filename = `grabacion-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`;
     try {
-      const attachment = await uploadAttachment(
-        session.id,
-        filename,
-        blob.type || "audio/webm",
-        "audio",
-        blob
-      );
+      const attachment = await uploadAttachment(session.id, filename, "audio", blob);
       setAttachments((prev) => [...prev, attachment]);
-    } catch {
+    } catch (err) {
       const url = URL.createObjectURL(blob);
       setAudioNotice({
         message:
-          "La grabación es muy grande para subirla automáticamente a Airtable (límite ~5MB por archivo). Descárgala y guárdala manualmente.",
+          (err instanceof Error ? err.message : "No se pudo subir la grabación automáticamente.") +
+          " Descárgala y guárdala manualmente.",
         downloadUrl: url,
       });
     }

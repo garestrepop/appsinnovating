@@ -9,6 +9,7 @@ export interface Project {
   name: string;
   client: string;
   description?: string;
+  driveFolderId?: string;
   createdAt: string;
 }
 
@@ -22,6 +23,7 @@ export interface InterviewSession {
   status: SessionStatus;
   notes?: string;
   transcript?: string;
+  driveFolderId?: string;
   createdAt: string;
 }
 
@@ -44,6 +46,7 @@ export interface Attachment {
   sessionId: string;
   kind: AttachmentKind;
   filename: string;
+  driveFileId?: string;
   url: string;
   createdAt: string;
 }

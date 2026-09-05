@@ -21,7 +21,6 @@ import type {
 } from "./types";
 
 const API_BASE = "https://api.airtable.com/v0";
-const CONTENT_API_BASE = "https://content.airtable.com/v0";
 
 function getCredentials() {
   const apiKey = process.env.AIRTABLE_API_KEY;
@@ -151,6 +150,7 @@ interface ProjectFieldsShape {
   [PROJECT_FIELDS.name]?: string;
   [PROJECT_FIELDS.client]?: string;
   [PROJECT_FIELDS.description]?: string;
+  [PROJECT_FIELDS.driveFolderId]?: string;
   [PROJECT_FIELDS.createdAt]?: string;
 }
 
@@ -160,6 +160,7 @@ function mapProject(record: AirtableRecord<ProjectFieldsShape>): Project {
     name: record.fields[PROJECT_FIELDS.name] ?? "",
     client: record.fields[PROJECT_FIELDS.client] ?? "",
     description: record.fields[PROJECT_FIELDS.description],
+    driveFolderId: record.fields[PROJECT_FIELDS.driveFolderId],
     createdAt: record.fields[PROJECT_FIELDS.createdAt] ?? record.createdTime,
   };
 }
@@ -171,6 +172,7 @@ interface SessionFieldsShape {
   [SESSION_FIELDS.status]?: SessionStatus;
   [SESSION_FIELDS.notes]?: string;
   [SESSION_FIELDS.transcript]?: string;
+  [SESSION_FIELDS.driveFolderId]?: string;
   [SESSION_FIELDS.createdAt]?: string;
 }
 
@@ -185,6 +187,7 @@ function mapSession(
     status: record.fields[SESSION_FIELDS.status] ?? "programada",
     notes: record.fields[SESSION_FIELDS.notes],
     transcript: record.fields[SESSION_FIELDS.transcript],
+    driveFolderId: record.fields[SESSION_FIELDS.driveFolderId],
     createdAt: record.fields[SESSION_FIELDS.createdAt] ?? record.createdTime,
   };
 }
@@ -220,7 +223,8 @@ function mapRequirement(
 interface AttachmentFieldsShape {
   [ATTACHMENT_FIELDS.filename]?: string;
   [ATTACHMENT_FIELDS.kind]?: AttachmentKind;
-  [ATTACHMENT_FIELDS.file]?: { url: string; filename: string }[];
+  [ATTACHMENT_FIELDS.driveFileId]?: string;
+  [ATTACHMENT_FIELDS.url]?: string;
   [ATTACHMENT_FIELDS.session]?: string[];
   [ATTACHMENT_FIELDS.createdAt]?: string;
 }
@@ -233,7 +237,8 @@ function mapAttachment(
     sessionId: record.fields[ATTACHMENT_FIELDS.session]?.[0] ?? "",
     kind: record.fields[ATTACHMENT_FIELDS.kind] ?? "documento",
     filename: record.fields[ATTACHMENT_FIELDS.filename] ?? "",
-    url: record.fields[ATTACHMENT_FIELDS.file]?.[0]?.url ?? "",
+    driveFileId: record.fields[ATTACHMENT_FIELDS.driveFileId],
+    url: record.fields[ATTACHMENT_FIELDS.url] ?? "",
     createdAt:
       record.fields[ATTACHMENT_FIELDS.createdAt] ?? record.createdTime,
   };
@@ -289,6 +294,17 @@ export async function createProject(input: {
   return mapProject(record);
 }
 
+export async function updateProject(
+  id: string,
+  patch: Partial<{ driveFolderId: string }>
+): Promise<Project> {
+  const fields: Partial<ProjectFieldsShape> = {};
+  if (patch.driveFolderId !== undefined)
+    fields[PROJECT_FIELDS.driveFolderId] = patch.driveFolderId;
+  const record = await updateRecord<ProjectFieldsShape>(TABLES.projects, id, fields);
+  return mapProject(record);
+}
+
 // ---------- Sessions ----------
 
 export async function listSessions(
@@ -329,6 +345,7 @@ export async function updateSession(
     status: SessionStatus;
     notes: string;
     transcript: string;
+    driveFolderId: string;
   }>
 ): Promise<InterviewSession> {
   const fields: Partial<SessionFieldsShape> = {};
@@ -337,6 +354,8 @@ export async function updateSession(
   if (patch.notes !== undefined) fields[SESSION_FIELDS.notes] = patch.notes;
   if (patch.transcript !== undefined)
     fields[SESSION_FIELDS.transcript] = patch.transcript;
+  if (patch.driveFolderId !== undefined)
+    fields[SESSION_FIELDS.driveFolderId] = patch.driveFolderId;
   const record = await updateRecord<SessionFieldsShape>(
     TABLES.sessions,
     id,
@@ -425,53 +444,28 @@ export async function listAttachments(
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
+// El archivo en sí vive en Google Drive (ver lib/googleDrive.ts); aquí solo
+// se guarda la referencia (DriveFileId + Url) para no depender del límite
+// de ~5MB del endpoint de adjuntos de Airtable.
 export async function createAttachment(input: {
   sessionId: string;
   kind: AttachmentKind;
   filename: string;
-  contentType: string;
-  base64Content: string;
+  driveFileId: string;
+  url: string;
 }): Promise<Attachment> {
-  const { apiKey, baseId } = requireCredentials();
-
   const record = await createRecord<AttachmentFieldsShape>(
     TABLES.attachments,
     {
       [ATTACHMENT_FIELDS.filename]: input.filename,
       [ATTACHMENT_FIELDS.kind]: input.kind,
+      [ATTACHMENT_FIELDS.driveFileId]: input.driveFileId,
+      [ATTACHMENT_FIELDS.url]: input.url,
       [ATTACHMENT_FIELDS.session]: [input.sessionId],
       [ATTACHMENT_FIELDS.createdAt]: new Date().toISOString(),
     }
   );
-
-  const uploadRes = await fetch(
-    `${CONTENT_API_BASE}/${baseId}/${record.id}/${encodeURIComponent(
-      ATTACHMENT_FIELDS.file
-    )}/uploadAttachment`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contentType: input.contentType,
-        file: input.base64Content,
-        filename: input.filename,
-      }),
-    }
-  );
-
-  if (!uploadRes.ok) {
-    const body = await uploadRes.text();
-    throw new Error(`Airtable upload error (${uploadRes.status}): ${body}`);
-  }
-
-  const updated = await getRecord<AttachmentFieldsShape>(
-    TABLES.attachments,
-    record.id
-  );
-  return mapAttachment(updated);
+  return mapAttachment(record);
 }
 
 // ---------- Suggested Questions ----------

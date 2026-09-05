@@ -17,7 +17,9 @@ seguimiento y guarda fotos/documentos — todo agrupado por proyecto.
 - **Preguntas sugeridas**: un motor de reglas por palabras clave analiza la
   transcripción y sugiere preguntas de seguimiento (ver "IA" abajo).
 - **Fotos y documentos**: adjunta archivos a cada sesión (bocetos, capturas,
-  documentos existentes del cliente).
+  documentos existentes del cliente, la grabación de audio). Los archivos se
+  guardan en Google Drive (no en la nube de Airtable), organizados en
+  carpetas por proyecto y por sesión.
 
 ## Estado de la integración de IA
 
@@ -32,8 +34,11 @@ basta con reemplazar su implementación interna — el endpoint
 ## Stack técnico
 
 - **Next.js 16 (App Router) + TypeScript + Tailwind CSS**
-- **Airtable** como base de datos (vía su API REST), para que además puedas
-  ver/editar los datos directamente en Airtable si quieres.
+- **Airtable** como base de datos de texto/metadatos (vía su API REST), para
+  que además puedas ver/editar los datos directamente en Airtable si quieres.
+- **Google Drive** para los archivos binarios (fotos, documentos, audio):
+  Airtable solo guarda el nombre y el enlace de Drive, así se evita el
+  límite de ~5MB del endpoint de adjuntos de Airtable.
 - **Deepgram** para transcripción de audio en tiempo real (streaming vía
   WebSocket desde el navegador, usando un token temporal generado por el
   backend para no exponer la API key permanente).
@@ -83,6 +88,7 @@ Crea una base en Airtable con estas tablas y campos exactos (nombres y tipos):
 | Name | Texto de una línea |
 | Client | Texto de una línea |
 | Description | Texto largo |
+| DriveFolderId | Texto de una línea (la app la llena sola) |
 | CreatedAt | Texto de una línea (se guarda como ISO string) |
 
 **Sessions**
@@ -94,6 +100,7 @@ Crea una base en Airtable con estas tablas y campos exactos (nombres y tipos):
 | Status | Selección única: `programada`, `en_curso`, `finalizada` |
 | Notes | Texto largo |
 | Transcript | Texto largo |
+| DriveFolderId | Texto de una línea (la app la llena sola) |
 | CreatedAt | Texto de una línea |
 
 **Requirements**
@@ -113,7 +120,8 @@ Crea una base en Airtable con estas tablas y campos exactos (nombres y tipos):
 |---|---|
 | Filename | Texto de una línea |
 | Kind | Selección única: `foto`, `documento`, `audio` |
-| File | Adjunto |
+| DriveFileId | Texto de una línea |
+| Url | URL |
 | Session | Vínculo a otro registro → Sessions |
 | CreatedAt | Texto de una línea |
 
@@ -134,7 +142,34 @@ Luego consigue:
 - **AIRTABLE_BASE_ID**: lo ves en la URL de la base (empieza con `app...`) o
   en https://airtable.com/api tras seleccionar la base.
 
-### 2. (Opcional) Cuenta de Deepgram para transcripción en vivo
+### 2. Configurar Google Drive (para fotos, documentos y audio)
+
+Los archivos no se guardan en Airtable ni en ningún otro servicio en la nube
+que tú no controles: se suben a tu propio Google Drive, en una carpeta que
+tú creas, organizados en subcarpetas por proyecto y por sesión.
+
+1. Crea un proyecto en https://console.cloud.google.com (o usa uno existente)
+   y habilita la **Google Drive API** (menú "APIs & Services" → "Enable APIs
+   and services" → busca "Google Drive API" → Enable).
+2. Configura la pantalla de consentimiento OAuth ("OAuth consent screen"):
+   tipo **External**, modo de publicación **Testing** está bien para uso
+   personal, y agrégate a ti mismo en "Test users".
+3. Crea credenciales OAuth ("Credentials" → "Create credentials" → "OAuth
+   client ID") de tipo **Desktop app**. Copia el **Client ID** y **Client
+   Secret** a tu `.env.local` (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`).
+4. Crea manualmente una carpeta en tu Google Drive (ej. "Asistente de
+   Requerimientos") y copia su ID de la URL:
+   `drive.google.com/drive/folders/<ESTE ES EL ID>` → ponlo en
+   `GOOGLE_DRIVE_ROOT_FOLDER_ID`.
+5. Corre `npm run setup:google-drive`: abre una URL de Google en tu
+   navegador, inicias sesión y autorizas el acceso (solo a archivos que esta
+   app cree, no a todo tu Drive), y el script te imprime el
+   `GOOGLE_REFRESH_TOKEN` para que lo agregues a `.env.local`.
+
+Sin estas variables, la app sigue funcionando pero la subida de adjuntos
+falla y solo queda la opción de descargar el archivo localmente.
+
+### 3. (Opcional) Cuenta de Deepgram para transcripción en vivo
 
 1. Crea una cuenta en https://console.deepgram.com (tiene crédito gratuito).
 2. Genera una API key con permisos de administrador del proyecto (necesaria
@@ -142,7 +177,7 @@ Luego consigue:
 3. Sin esta variable, la app sigue funcionando: graba el audio normalmente,
    solo no muestra transcripción en vivo (se puede escribir manualmente).
 
-### 3. Variables de entorno
+### 4. Variables de entorno
 
 Copia `.env.example` a `.env.local` y completa los valores:
 
@@ -150,7 +185,7 @@ Copia `.env.example` a `.env.local` y completa los valores:
 cp .env.example .env.local
 ```
 
-### 4. Instalar y correr localmente
+### 5. Instalar y correr localmente
 
 ```bash
 npm install
@@ -161,9 +196,9 @@ Abre http://localhost:3000
 
 ## Limitaciones conocidas
 
-- El endpoint de subida de adjuntos de Airtable acepta archivos de hasta
-  ~5MB. Si una grabación de audio supera ese tamaño, la app no podrá subirla
-  automáticamente y en su lugar ofrece un enlace para descargarla localmente.
+- Si Google Drive no está configurado, o la subida falla por cualquier
+  motivo (sin internet, token vencido, etc.), la app ofrece descargar el
+  archivo localmente en vez de perder la grabación.
 - La transcripción en vivo depende del navegador (probado en Chrome/Edge) y
   de tener buena conexión a internet.
 - Las "preguntas sugeridas" son heurísticas (reglas por palabras clave), no

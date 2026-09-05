@@ -10,30 +10,18 @@ interface AttachmentsPanelProps {
   onUploaded: (attachment: Attachment) => void;
 }
 
-function fileToBase64(file: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      resolve(result.split(",")[1] ?? "");
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 export async function uploadAttachment(
   sessionId: string,
   filename: string,
-  contentType: string,
   kind: AttachmentKind,
   file: Blob
 ): Promise<Attachment> {
-  const base64Content = await fileToBase64(file);
+  const formData = new FormData();
+  formData.append("file", file, filename);
+  formData.append("kind", kind);
   const res = await fetch(`/api/sessions/${sessionId}/attachments`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filename, contentType, base64Content, kind }),
+    body: formData,
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
@@ -61,13 +49,7 @@ export function AttachmentsPanel({
       const kind: AttachmentKind = file.type.startsWith("image/")
         ? "foto"
         : "documento";
-      const attachment = await uploadAttachment(
-        sessionId,
-        file.name,
-        file.type || "application/octet-stream",
-        kind,
-        file
-      );
+      const attachment = await uploadAttachment(sessionId, file.name, kind, file);
       onUploaded(attachment);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error inesperado");
