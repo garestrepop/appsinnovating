@@ -42,6 +42,39 @@ basta con reemplazar su implementación interna — el endpoint
 
 ### 1. Crear la base de Airtable
 
+Hay dos formas de crear las tablas. La recomendada es correr el script de
+migración; la manual queda documentada por si prefieres crearlas a mano o
+necesitas ajustar algo.
+
+#### Opción A (recomendada): script de migración
+
+1. Crea una base vacía en Airtable ("Create a base" → "Start from scratch")
+   y copia su ID de la URL (empieza con `app...`).
+2. Genera un Personal Access Token en https://airtable.com/create/tokens con
+   los scopes `schema.bases:write`, `schema.bases:read`, `data.records:read`
+   y `data.records:write`, y agrega esa base en la sección "Access" del token.
+3. Copia `.env.example` a `.env.local` y completa `AIRTABLE_API_KEY` y
+   `AIRTABLE_BASE_ID`.
+4. Corre:
+
+   ```bash
+   npm install
+   npm run setup:airtable
+   ```
+
+   El script (`scripts/setup-airtable.mjs`) crea las 5 tablas con los campos
+   y tipos exactos que la app espera, usando la API de metadatos de
+   Airtable. Es seguro volver a correrlo: las tablas que ya existan (por
+   nombre) se dejan intactas, solo crea las que falten.
+
+   Alternativa: si defines `AIRTABLE_WORKSPACE_ID` en vez de
+   `AIRTABLE_BASE_ID` (lo ves en la URL cuando estás dentro de un workspace
+   en Airtable, empieza con `wsp...`), el script crea la base nueva por ti y
+   te dice qué `AIRTABLE_BASE_ID` guardar. Airtable crea una tabla "Table 1"
+   por defecto junto con las demás; puedes borrarla manualmente, no la usa la app.
+
+#### Opción B: crear las tablas a mano
+
 Crea una base en Airtable con estas tablas y campos exactos (nombres y tipos):
 
 **Projects**
