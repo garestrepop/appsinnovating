@@ -175,26 +175,26 @@ export function Recorder({
           <button
             onClick={stop}
             disabled={state === "stopping"}
-            className="flex items-center gap-2 rounded-md bg-zinc-800 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-md border border-border bg-surface-hover px-4 py-2 text-sm font-medium text-foreground hover:bg-black/40 disabled:opacity-50"
           >
             <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
             {state === "stopping" ? "Deteniendo..." : "Detener grabación"}
           </button>
         )}
         {isRecording && deepgramConfigured && (
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-muted">
             {liveTranscriptionActive
               ? "Transcripción en vivo activa"
               : "Grabando audio (sin transcripción en vivo)"}
           </span>
         )}
         {isRecording && !deepgramConfigured && (
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-muted">
             Grabando audio. Configura DEEPGRAM_API_KEY para transcripción en vivo.
           </span>
         )}
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
     </div>
   );
 }

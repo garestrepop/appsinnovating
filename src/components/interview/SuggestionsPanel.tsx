@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cardClass, primaryButtonClass, secondaryButtonClass } from "@/lib/ui";
 import type { SuggestedQuestion, SuggestionStatus } from "@/lib/types";
 
 interface SuggestionsPanelProps {
@@ -61,58 +62,58 @@ export function SuggestionsPanel({
     : suggestions.filter((s) => s.status === "pendiente");
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4">
+    <div className={`flex flex-col gap-3 ${cardClass}`}>
       <div className="flex items-center justify-between">
-        <h2 className="font-medium">Preguntas sugeridas</h2>
+        <h2 className="font-medium text-foreground">Preguntas sugeridas</h2>
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+          className={`px-3 py-1.5 text-xs ${primaryButtonClass}`}
         >
           {loading ? "Analizando..." : "Sugerir preguntas"}
         </button>
       </div>
-      <p className="text-xs text-zinc-400">
+      <p className="text-xs text-muted">
         Sugerencias basadas en reglas por palabras clave (placeholder mientras se
         conecta un modelo de IA). Se generan a partir de lo que hay en la transcripción.
       </p>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       <ul className="flex flex-col gap-2">
         {visible.map((s) => (
           <li
             key={s.id}
-            className="flex flex-col gap-1 rounded-md border border-zinc-200 p-3 text-sm"
+            className="flex flex-col gap-1 rounded-md border border-border p-3 text-sm"
           >
-            <span className="w-fit rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
+            <span className="w-fit rounded-full bg-accent-blue/15 px-2 py-0.5 text-xs text-accent-blue">
               {s.category}
             </span>
-            <p className="font-medium">{s.question}</p>
-            <p className="text-xs text-zinc-500">{s.reason}</p>
+            <p className="font-medium text-foreground">{s.question}</p>
+            <p className="text-xs text-muted">{s.reason}</p>
             {s.status === "pendiente" ? (
               <div className="mt-1 flex gap-2">
                 <button
                   onClick={() => handleStatusChange(s.id, "preguntada")}
-                  className="rounded-md border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-50"
+                  className={`px-2 py-1 text-xs ${secondaryButtonClass}`}
                 >
                   Ya la pregunté
                 </button>
                 <button
                   onClick={() => handleStatusChange(s.id, "descartada")}
-                  className="rounded-md border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-50"
+                  className={`px-2 py-1 text-xs ${secondaryButtonClass}`}
                 >
                   Descartar
                 </button>
               </div>
             ) : (
-              <span className="mt-1 w-fit rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500">
+              <span className="mt-1 w-fit rounded-full bg-white/10 px-2 py-0.5 text-xs text-muted">
                 {s.status === "preguntada" ? "Preguntada" : "Descartada"}
               </span>
             )}
           </li>
         ))}
         {visible.length === 0 && (
-          <li className="text-sm text-zinc-400">
+          <li className="text-sm text-muted">
             No hay sugerencias pendientes. Usa &quot;Sugerir preguntas&quot; mientras avanza la entrevista.
           </li>
         )}
@@ -121,7 +122,7 @@ export function SuggestionsPanel({
       {suggestions.length > 0 && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="self-start text-xs text-indigo-600 hover:underline"
+          className="self-start text-xs text-accent-blue hover:text-accent-purple hover:underline"
         >
           {showAll ? "Ver solo pendientes" : "Ver todas"}
         </button>

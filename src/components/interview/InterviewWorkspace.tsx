@@ -9,6 +9,7 @@ import type {
   SuggestedQuestion,
 } from "@/lib/types";
 import { useDebouncedSave } from "@/lib/useDebouncedSave";
+import { cardClass, secondaryButtonClass } from "@/lib/ui";
 import { Recorder } from "./Recorder";
 import { TranscriptPanel } from "./TranscriptPanel";
 import { RequirementsPanel } from "./RequirementsPanel";
@@ -99,8 +100,8 @@ export function InterviewWorkspace({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold">{session.title}</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-xl font-semibold text-foreground">{session.title}</h1>
+          <p className="text-sm text-muted">
             {new Date(session.date).toLocaleDateString("es-CO", {
               year: "numeric",
               month: "long",
@@ -113,7 +114,7 @@ export function InterviewWorkspace({
           {status !== "en_curso" && status !== "finalizada" && (
             <button
               onClick={() => handleStatusChange("en_curso")}
-              className="rounded-md bg-zinc-800 px-3 py-1.5 text-sm text-white hover:bg-zinc-700"
+              className="rounded-md bg-accent-blue px-3 py-1.5 text-sm font-medium text-black hover:bg-accent-blue-strong"
             >
               Iniciar sesión
             </button>
@@ -121,7 +122,7 @@ export function InterviewWorkspace({
           {status !== "finalizada" && (
             <button
               onClick={() => handleStatusChange("finalizada")}
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-50"
+              className={`px-3 py-1.5 text-sm ${secondaryButtonClass}`}
             >
               Finalizar sesión
             </button>
@@ -129,7 +130,7 @@ export function InterviewWorkspace({
         </div>
       </div>
 
-      <div className="rounded-lg border border-zinc-200 bg-white p-4">
+      <div className={cardClass}>
         <Recorder
           deepgramConfigured={deepgramConfigured}
           onTranscript={handleTranscriptChunk}
@@ -138,13 +139,13 @@ export function InterviewWorkspace({
       </div>
 
       {audioNotice && (
-        <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
           <p>{audioNotice.message}</p>
           {audioNotice.downloadUrl && (
             <a
               href={audioNotice.downloadUrl}
               download="grabacion.webm"
-              className="mt-1 inline-block font-medium text-amber-900 underline"
+              className="mt-1 inline-block font-medium text-amber-100 underline"
             >
               Descargar grabación
             </a>

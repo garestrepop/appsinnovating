@@ -29,7 +29,7 @@ export default async function SessionPage({
     <div className="flex flex-col gap-4">
       <Link
         href={`/projects/${projectId}`}
-        className="text-sm text-indigo-600 hover:underline"
+        className="text-sm text-accent-blue hover:text-accent-purple hover:underline"
       >
         ← Volver al proyecto
       </Link>

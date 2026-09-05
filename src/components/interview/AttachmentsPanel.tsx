@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { cardClass } from "@/lib/ui";
 import type { Attachment, AttachmentKind } from "@/lib/types";
 
 interface AttachmentsPanelProps {
@@ -77,18 +78,18 @@ export function AttachmentsPanel({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4">
-      <h2 className="font-medium">Fotos y documentos</h2>
+    <div className={`flex flex-col gap-3 ${cardClass}`}>
+      <h2 className="font-medium text-foreground">Fotos y documentos</h2>
       <input
         ref={inputRef}
         type="file"
         accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
         onChange={handleFileChange}
         disabled={uploading}
-        className="text-sm"
+        className="text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-gradient-to-r file:from-accent-purple file:to-accent-blue file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white"
       />
-      {uploading && <p className="text-xs text-zinc-500">Subiendo...</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {uploading && <p className="text-xs text-muted">Subiendo...</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
       <ul className="flex flex-col gap-1">
         {attachments.map((a) => (
           <li key={a.id} className="text-sm">
@@ -96,14 +97,14 @@ export function AttachmentsPanel({
               href={a.url || "#"}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="text-accent-blue hover:text-accent-purple hover:underline"
             >
               {a.kind === "foto" ? "🖼️" : a.kind === "audio" ? "🎧" : "📄"} {a.filename}
             </a>
           </li>
         ))}
         {attachments.length === 0 && (
-          <li className="text-sm text-zinc-400">Sin archivos todavía.</li>
+          <li className="text-sm text-muted">Sin archivos todavía.</li>
         )}
       </ul>
     </div>

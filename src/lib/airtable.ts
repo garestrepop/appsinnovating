@@ -65,6 +65,14 @@ async function airtableRequest<T>(
   });
   if (!res.ok) {
     const body = await res.text();
+    if (res.status === 404) {
+      throw new Error(
+        `Airtable API error (404): ${body}. Verifica que AIRTABLE_BASE_ID sea correcto (empieza con "app..."), ` +
+          `que las tablas existan en esa base con el nombre exacto (Projects, Sessions, Requirements, Attachments, ` +
+          `SuggestedQuestions — respetando mayúsculas) y que el Personal Access Token tenga esta base agregada en ` +
+          `"Access" al crearlo en airtable.com/create/tokens.`
+      );
+    }
     throw new Error(`Airtable API error (${res.status}): ${body}`);
   }
   return res.json() as Promise<T>;

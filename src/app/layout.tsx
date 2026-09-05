@@ -25,11 +25,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900">
-        <header className="border-b border-zinc-200 bg-white">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <header className="border-b border-border bg-surface/80 backdrop-blur">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-600 text-sm text-white">
+            <Link href="/" className="flex items-center gap-2 font-semibold text-foreground">
+              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-accent-purple to-accent-blue text-sm font-bold text-white shadow-[0_0_14px_rgba(168,85,247,0.55)]">
                 AR
               </span>
               <span>Asistente de Requerimientos</span>

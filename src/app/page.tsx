@@ -12,8 +12,8 @@ export default async function Home() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Proyectos</h1>
-        <p className="mt-1 text-sm text-zinc-600">
+        <h1 className="text-2xl font-semibold text-foreground">Proyectos</h1>
+        <p className="mt-1 text-sm text-muted">
           Agrupa tus entrevistas de levantamiento de requerimientos por proyecto de cliente.
         </p>
       </div>
@@ -26,7 +26,7 @@ export default async function Home() {
 
       <div className="flex flex-col gap-3">
         {configured && projects.length === 0 && (
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted">
             Todavía no tienes proyectos. Crea el primero arriba.
           </p>
         )}
@@ -34,12 +34,12 @@ export default async function Home() {
           <Link
             key={project.id}
             href={`/projects/${project.id}`}
-            className="flex flex-col rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-indigo-300 hover:bg-indigo-50/40"
+            className="flex flex-col rounded-lg border border-border bg-surface p-4 transition-colors hover:border-accent-purple hover:bg-surface-hover"
           >
-            <span className="font-medium">{project.name}</span>
-            <span className="text-sm text-zinc-500">Cliente: {project.client}</span>
+            <span className="font-medium text-foreground">{project.name}</span>
+            <span className="text-sm text-accent-blue">Cliente: {project.client}</span>
             {project.description && (
-              <span className="mt-1 text-sm text-zinc-600">{project.description}</span>
+              <span className="mt-1 text-sm text-muted">{project.description}</span>
             )}
           </Link>
         ))}

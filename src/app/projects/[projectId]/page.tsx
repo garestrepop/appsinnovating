@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, listRequirements, listSessions } from "@/lib/airtable";
 import { NewSessionForm } from "@/components/NewSessionForm";
+import { cardClass } from "@/lib/ui";
 import type { SessionStatus } from "@/lib/types";
 
 const STATUS_LABEL: Record<SessionStatus, string> = {
@@ -11,9 +12,9 @@ const STATUS_LABEL: Record<SessionStatus, string> = {
 };
 
 const STATUS_COLOR: Record<SessionStatus, string> = {
-  programada: "bg-zinc-100 text-zinc-700",
-  en_curso: "bg-amber-100 text-amber-800",
-  finalizada: "bg-emerald-100 text-emerald-800",
+  programada: "bg-white/10 text-muted",
+  en_curso: "bg-accent-blue/20 text-accent-blue",
+  finalizada: "bg-accent-purple/20 text-accent-purple",
 };
 
 export default async function ProjectPage({
@@ -37,47 +38,47 @@ export default async function ProjectPage({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link href="/" className="text-sm text-indigo-600 hover:underline">
+        <Link href="/" className="text-sm text-accent-blue hover:text-accent-purple hover:underline">
           ← Todos los proyectos
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold">{project.name}</h1>
-        <p className="text-sm text-zinc-600">Cliente: {project.client}</p>
+        <h1 className="mt-1 text-2xl font-semibold text-foreground">{project.name}</h1>
+        <p className="text-sm text-muted">Cliente: {project.client}</p>
         {project.description && (
-          <p className="mt-1 text-sm text-zinc-600">{project.description}</p>
+          <p className="mt-1 text-sm text-muted">{project.description}</p>
         )}
       </div>
 
       <div className="flex gap-3">
-        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3">
-          <p className="text-xs text-zinc-500">Requerimientos funcionales</p>
-          <p className="text-xl font-semibold">{funcionales}</p>
+        <div className={cardClass}>
+          <p className="text-xs text-muted">Requerimientos funcionales</p>
+          <p className="text-xl font-semibold text-accent-purple">{funcionales}</p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3">
-          <p className="text-xs text-zinc-500">No funcionales</p>
-          <p className="text-xl font-semibold">{noFuncionales}</p>
+        <div className={cardClass}>
+          <p className="text-xs text-muted">No funcionales</p>
+          <p className="text-xl font-semibold text-accent-blue">{noFuncionales}</p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3">
-          <p className="text-xs text-zinc-500">Sesiones</p>
-          <p className="text-xl font-semibold">{sessions.length}</p>
+        <div className={cardClass}>
+          <p className="text-xs text-muted">Sesiones</p>
+          <p className="text-xl font-semibold text-foreground">{sessions.length}</p>
         </div>
       </div>
 
       <NewSessionForm projectId={projectId} />
 
       <div className="flex flex-col gap-3">
-        <h2 className="font-medium">Sesiones</h2>
+        <h2 className="font-medium text-foreground">Sesiones</h2>
         {sessions.length === 0 && (
-          <p className="text-sm text-zinc-500">Aún no hay sesiones para este proyecto.</p>
+          <p className="text-sm text-muted">Aún no hay sesiones para este proyecto.</p>
         )}
         {sessions.map((session) => (
           <Link
             key={session.id}
             href={`/projects/${projectId}/sessions/${session.id}`}
-            className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 transition-colors hover:border-indigo-300 hover:bg-indigo-50/40"
+            className="flex items-center justify-between rounded-lg border border-border bg-surface p-4 transition-colors hover:border-accent-purple hover:bg-surface-hover"
           >
             <div>
-              <p className="font-medium">{session.title}</p>
-              <p className="text-sm text-zinc-500">
+              <p className="font-medium text-foreground">{session.title}</p>
+              <p className="text-sm text-muted">
                 {new Date(session.date).toLocaleDateString("es-CO", {
                   year: "numeric",
                   month: "long",
